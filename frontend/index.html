@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Manager</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 500px; margin: 40px auto; padding: 0 16px; background: #f4f6f8; }
+    h1 { text-align: center; }
+    form { display: flex; gap: 8px; margin-bottom: 20px; }
+    input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
+    button { padding: 10px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
+    #addBtn { background: #2563eb; color: white; }
+    ul { list-style: none; padding: 0; }
+    li { background: white; padding: 12px; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
+    li.done span { text-decoration: line-through; color: #888; }
+    .doneBtn { background: #16a34a; color: white; margin-right: 6px; }
+    .delBtn { background: #dc2626; color: white; }
+  </style>
+</head>
+<body>
+  <h1>Task Manager</h1>
+
+  <form id="taskForm">
+    <input id="titleInput" placeholder="New task..." required>
+    <button id="addBtn" type="submit">Add</button>
+  </form>
+
+  <ul id="taskList"></ul>
+
+  <script>
+    const API = "http://127.0.0.1:8000";
+
+    async function loadTasks() {
+      const res = await fetch(API + "/tasks");
+      const tasks = await res.json();
+      const list = document.getElementById("taskList");
+      list.innerHTML = "";
+
+      tasks.forEach(task => {
+        const li = document.createElement("li");
+        if (task.done) li.classList.add("done");
+
+        const span = document.createElement("span");
+        span.textContent = task.title;
+
+        const box = document.createElement("div");
+
+        if (!task.done) {
+          const doneBtn = document.createElement("button");
+          doneBtn.textContent = "Done";
+          doneBtn.className = "doneBtn";
+          doneBtn.onclick = () => markDone(task.id);
+          box.appendChild(doneBtn);
+        }
+
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "Delete";
+        delBtn.className = "delBtn";
+        delBtn.onclick = () => deleteTask(task.id);
+        box.appendChild(delBtn);
+
+        li.append(span, box);
+        list.appendChild(li);
+      });
+    }
+
+    async function addTask(event) {
+      event.preventDefault();
+      const input = document.getElementById("titleInput");
+      await fetch(API + "/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: input.value })
+      });
+      input.value = "";
+      loadTasks();
+    }
+
+    async function markDone(id) {
+      await fetch(`${API}/tasks/${id}/done`, { method: "PUT" });
+      loadTasks();
+    }
+
+    async function deleteTask(id) {
+      await fetch(`${API}/tasks/${id}`, { method: "DELETE" });
+      loadTasks();
+    }
+
+    document.getElementById("taskForm").addEventListener("submit", addTask);
+    loadTasks();
+  </script>
+</body>
+</html>
