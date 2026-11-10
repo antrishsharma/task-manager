@@ -29,8 +29,7 @@
   <ul id="taskList"></ul>
 
   <script>
-    const API = "http://127.0.0.1:8000";
-
+    const API = "https://task-manager-uiyv.onrender.com";
     async function loadTasks() {
       const res = await fetch(API + "/tasks");
       const tasks = await res.json();
