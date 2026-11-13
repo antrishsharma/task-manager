@@ -9,7 +9,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://heartfelt-melomakarona-f09dfe.netlify.app"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
